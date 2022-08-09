@@ -1,0 +1,32 @@
+name: 'Test lib implementation'
+
+on:
+  push:
+    branches:
+      - feedback
+
+jobs:
+  test-all:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Get criterion
+        run: sudo apt-get install libcriterion-dev -y
+
+      - name: Get Cmake
+        uses: lukka/get-cmake@latest
+
+      - name: Build tests
+        run: cmake . && cmake --build tests
+
+      - name: run tests
+        run: tests/test --quiet --jobs 0 --xml=results.xml
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/composite@v1
+        if: always()
+        with:
+          files: "results.xml"
